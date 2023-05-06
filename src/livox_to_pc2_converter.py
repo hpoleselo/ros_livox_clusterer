@@ -6,33 +6,13 @@ Author: Henrique Poleselo
 May 6th 2023.
 """
 #!/usr/bin/env python3
+
 import rospy
 from livox_ros_driver.msg import CustomMsg, CustomPoint
 from sensor_msgs.msg import PointCloud2, PointField
 from std_msgs.msg import Header
 from sensor_msgs import point_cloud2
 import struct
-
-
-"""
-livox_ros_driver/CustomMsg 
-std_msgs/Header header
-  uint32 seq
-  time stamp
-  string frame_id
-uint64 timebase
-uint32 point_num
-uint8 lidar_id
-uint8[3] rsvd
-livox_ros_driver/CustomPoint[] points
-  uint32 offset_time
-  float32 x
-  float32 y
-  float32 z
-  uint8 reflectivity
-  uint8 tag
-  uint8 line
-"""
 
 # TODO: To be set in the the launch file
 TOPIC_NAME = '/livox/lidar'
@@ -62,7 +42,8 @@ def custom_msg_to_pc2(livox_custom_msg: CustomMsg):
     # Instead using a Python function which does all that for us
     header = Header()
     header.seq = livox_custom_msg.header.seq
-    header.stamp.secs = livox_custom_msg.header.stamp
+    # TODO: needs to be properbly serialized before sent
+    #header.stamp.secs = livox_custom_msg.header.stamp
     header.frame_id = livox_custom_msg.header.frame_id
 
     # Point Cloud Data: PC2 takes in PointField for each dimension (x,y,z)
@@ -86,6 +67,7 @@ def custom_msg_to_pc2(livox_custom_msg: CustomMsg):
     pt = [x, y, z, 0]
     points.append(pt)
     
+    # create_cloud.py deals with the serialization of Point Cloud 2 message
     pc2_msg = point_cloud2.create_cloud(header, fields, points)
 
     return pc2_msg
